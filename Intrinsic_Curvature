@@ -1,0 +1,31 @@
+# uses Caret to compute Gaussian curvature based on FS-surface
+# See Ronan et al., Cereb Cortex, 2014 
+# Use MatLab to pull vertex values.
+
+source SUBJECTS
+
+for subject in $SUBJECTS;
+do
+
+cd "$subject"/surf
+
+caret_command -file-convert -sc -is FSS lh.white -os CARET lh.white.coord.gii lh.white.topo.gii FIDUCIAL CLOSED -struct left
+caret_command -file-convert -sc -is FSS lh.pial -os CARET lh.pial.coord.gii lh.pial.topo.gii FIDUCIAL CLOSED -struct left
+caret_command -file-convert -sc -is FSS rh.white -os CARET rh.white.coord.gii rh.white.topo.gii FIDUCIAL CLOSED -struct right
+caret_command -file-convert -sc -is FSS rh.pial -os CARET rh.pial.coord.gii rh.pial.topo.gii FIDUCIAL CLOSED -struct right
+
+#caret_command -file-convert -fsc2c lh.thickness lh.white lh.thickness.metric
+#caret_command -metric-math lh.thickness.metric lh.thickness.metric 1 "abs[@1@]"
+
+caret_command -file-convert -fsc2c lh.curv lh.white lh.curv.metric
+caret_command -file-convert -fsc2c rh.curv rh.white rh.curv.metric
+
+caret_command -surface-curvature lh.pial.coord.gii lh.pial.topo.gii lh.curv.metric lh.caret.curv -generate-gaussian-curvature -gaussian-column-name GS -WRITE-FILE-FORMAT COMMA_SEPARATED_VALUE_FILE
+caret_command -surface-curvature rh.pial.coord.gii rh.pial.topo.gii rh.curv.metric rh.caret.curv -generate-gaussian-curvature -gaussian-column-name GS -WRITE-FILE-FORMAT COMMA_SEPARATED_VALUE_FILE
+
+caret_command -surface-curvature lh.white.coord.gii lh.white.topo.gii lh.curv.metric lh.whitecaret.curv -generate-gaussian-curvature -gaussian-column-name GS -WRITE-FILE-FORMAT COMMA_SEPARATED_VALUE_FILE
+caret_command -surface-curvature rh.white.coord.gii rh.white.topo.gii rh.curv.metric rh.whitecaret.curv -generate-gaussian-curvature -gaussian-column-name GS -WRITE-FILE-FORMAT COMMA_SEPARATED_VALUE_FILE
+
+cd ../..
+done
+
